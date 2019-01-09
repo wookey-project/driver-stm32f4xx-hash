@@ -10,9 +10,8 @@ typedef enum {
 } hash_transfert_mode_t;
 
 typedef enum {
-    HASH_MAP_THROUGH_CRYP,
-    HASH_MAP_STANDALONE,
-    HASH_MAP_STANDALONE_VOLUNTARY
+    HASH_MAP_AUTO,
+    HASH_MAP_VOLUNTARY
 } hash_map_mode_t;
 
 typedef enum {
@@ -48,5 +47,7 @@ uint8_t hash_init(cb_endofdigest eodigest_callback, cb_endofdma eodma_callback, 
 uint8_t hash_request(hash_req_type_t type, uint32_t addr, uint32_t size);
 
 uint8_t hash_finalize(void);
+
+void hash_unmap(void);
 
 #endif/*!HASH_H_*/

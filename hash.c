@@ -10,6 +10,7 @@ enum dma_controller {
     DMA2 = 2
 };
 
+#define DMA_MAX_TRANSFERT_SIZE 0x8000
 
 #define DMA2_STREAM_HASH_IN 7
 #define DMA2_CHANNEL_HASH_IN 2
@@ -23,13 +24,37 @@ static int dev_hash_desc = 0;
 static dma_t dma_hash = { 0 };
 static device_t dev_hash = { 0 };
 
+static volatile bool hash_is_mapped = false;
+
+
 static cb_endofdigest eodigest_cb = 0;
 static cb_endofdma    eodma_cb = 0;
+static volatile bool dma_end = false;
+
+void hash_wait_dma_end(void)
+{
+    while (!dma_end) {}
+    dma_end = 0;
+}
+
+void hash_unmap(void)
+{
+    if (hash_is_mapped) {
+        printf("Unmapping hash\n");
+        uint8_t ret;
+        ret = sys_cfg(CFG_DEV_UNMAP, dev_hash_desc);
+        hash_is_mapped = false;
+        if (ret != SYS_E_DONE) {
+            printf("Unable to unmap hash!\n");
+        }
+    }
+}
 
 static void hash_send_buf_dma(physaddr_t buff, uint32_t size)
 {
     uint8_t ret;
 
+    printf("sending %x bytes from @%x through DMA\n", size, buff);
     dma_hash.in_addr = buff;
     dma_hash.size    = size;
 
@@ -59,6 +84,7 @@ static void dma_hash_handler(uint8_t irq __attribute__((unused)),
     if (eodma_cb) {
         eodma_cb(status);
     }
+    dma_end = true;
 
 }
 
@@ -90,12 +116,48 @@ uint8_t hash_request(hash_req_type_t      type,
             hash_send_buf_nodma(addr, size);
             set_reg(_r_CORTEX_M_HASH_STR, 0x1, HASH_STR_DCAL);
         } else {
+            uint32_t residue = size;
+            uint32_t offset = 0;
+
+            if (size > DMA_MAX_TRANSFERT_SIZE) {
+                do {
+                    hash_send_buf_dma(addr+offset, DMA_MAX_TRANSFERT_SIZE);
+                    hash_wait_dma_end();
+                    residue -= DMA_MAX_TRANSFERT_SIZE;
+                    offset += DMA_MAX_TRANSFERT_SIZE;
+                    set_reg(_r_CORTEX_M_HASH_CR, 0x0, HASH_CR_MDMAT);
+                    set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_DMAE);
+                } while (residue > DMA_MAX_TRANSFERT_SIZE);
+            }
+
             set_reg(_r_CORTEX_M_HASH_CR, 0x0, HASH_CR_MDMAT);
-            hash_send_buf_dma(addr, size);
+            set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_DMAE);
+            hash_send_buf_dma(addr+offset, residue);
+            hash_wait_dma_end();
+
             set_reg(_r_CORTEX_M_HASH_STR, 0x1, HASH_STR_DCAL);
         }
     } else {
         if (use_dma) {
+            uint32_t residue = size;
+            uint32_t offset = 0;
+
+            if (size > DMA_MAX_TRANSFERT_SIZE) {
+                do {
+                    hash_send_buf_dma(addr+offset, DMA_MAX_TRANSFERT_SIZE);
+                    hash_wait_dma_end();
+                    residue -= DMA_MAX_TRANSFERT_SIZE;
+                    offset += DMA_MAX_TRANSFERT_SIZE;
+                    set_reg(_r_CORTEX_M_HASH_CR, 0x0, HASH_CR_MDMAT);
+                    set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_DMAE);
+                } while (residue > DMA_MAX_TRANSFERT_SIZE);
+            }
+
+            set_reg(_r_CORTEX_M_HASH_CR, 0x0, HASH_CR_MDMAT);
+            set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_DMAE);
+            hash_send_buf_dma(addr+offset, residue);
+            hash_wait_dma_end();
+
             set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_MDMAT);
             hash_send_buf_dma(addr, size);
         } else {
@@ -109,6 +171,17 @@ uint8_t hash_init(cb_endofdigest eodigest_callback,
                   cb_endofdma    eodma_callback,
                   hash_algo_t algo)
 {
+
+    if (!hash_is_mapped) {
+        uint8_t ret;
+        ret = sys_cfg(CFG_DEV_MAP, dev_hash_desc);
+        hash_is_mapped = true;
+        if (ret != SYS_E_DONE) {
+            printf("Enable to map hash device!\n");
+            goto err;
+        }
+    }
+
     uint32_t reg = 0;
     /* registering the End Of Digest callback */
     if (eodigest_callback) {
@@ -177,6 +250,8 @@ uint8_t hash_init(cb_endofdigest eodigest_callback,
     /* end of init, activating HASH */
     set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_INIT);
 
+    printf("Hash initialization complete.\n");
+
     return 0;
 err:
     return 1;
@@ -206,7 +281,7 @@ uint8_t hash_early_init(hash_transfert_mode_t transfert_mode,
         dma_hash.dev_burst    = DMA_BURST_INC4;
         dma_hash.flow_control = DMA_FLOWCTRL_DMA;
         dma_hash.in_handler   = (user_dma_handler_t) dma_hash_handler;
-        dma_hash.out_handler  = (user_dma_handler_t) 0;    /* not used */
+        dma_hash.out_handler  = (user_dma_handler_t) dma_hash_handler;    /* not used */
 
 #ifdef CONFIG_USR_DRV_HASH_DEBUG
         printf("init DMA CRYP in...\n");
@@ -222,20 +297,8 @@ uint8_t hash_early_init(hash_transfert_mode_t transfert_mode,
     }
 
     switch (map_mode) {
-        case HASH_MAP_THROUGH_CRYP:
-            {
-    /* if HASH is mapped through CRYP, we consider that the task is
-     * using the cryp driver in cryp-full or cryp-cfg mode, which include,
-     * in both cases, the cryp *and* the hash device. This means that
-     * this driver doesn't need to map the hash device in memory.
-     * If the hash driver is standalone (without using the cryp driver)
-     * the hash device is mapped here */
-                printf("hash device already mapped by cryp driver\n");
-                printf("be sure that cryp_init() has been called before\n");
-                break;
-            }
-        case HASH_MAP_STANDALONE:
-        case HASH_MAP_STANDALONE_VOLUNTARY:
+        case HASH_MAP_AUTO:
+        case HASH_MAP_VOLUNTARY:
             {
                 printf("decaring hash device\n");
                 const char *name = "hash";
@@ -243,7 +306,7 @@ uint8_t hash_early_init(hash_transfert_mode_t transfert_mode,
                 strncpy(dev_hash.name, name, sizeof (dev_hash.name));
                 dev_hash.address = 0x50060400;
                 dev_hash.size = 0x400;
-                if (map_mode == HASH_MAP_STANDALONE) {
+                if (map_mode == HASH_MAP_AUTO) {
                     dev_hash.map_mode = DEV_MAP_AUTO;
                 } else {
                     dev_hash.map_mode = DEV_MAP_VOLUNTARY;
