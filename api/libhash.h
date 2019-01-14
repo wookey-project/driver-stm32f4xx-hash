@@ -34,20 +34,24 @@ typedef enum {
     HASH_HMAC_SHA256,
 } hash_algo_t;
 
-typedef void (*cb_endofdigest)(uint32_t sr);
-typedef void (*cb_endofdma)(uint32_t sr);
+typedef void (*cb_endofdigest)(uint8_t irq, uint32_t sr);
+typedef void (*cb_endofdma)(uint8_t irq, uint32_t sr);
 
 
-uint8_t hash_early_init(hash_transfert_mode_t transfert_mode,
+int hash_early_init(hash_transfert_mode_t transfert_mode,
                         hash_map_mode_t       map_mode,
                         hash_dev_mode_t       dev_mode);
 
-uint8_t hash_init(cb_endofdigest eodigest_callback, cb_endofdma eodma_callback, hash_algo_t algo);
+int hash_init(cb_endofdigest eodigest_callback, cb_endofdma eodma_callback, hash_algo_t algo);
 
-uint8_t hash_request(hash_req_type_t type, uint32_t addr, uint32_t size);
+int hash_request(hash_req_type_t type, uint32_t addr, uint32_t size);
 
-uint8_t hash_finalize(void);
+int hash_finalize(void);
 
-void hash_unmap(void);
+int hash_map(void);
+
+int hash_unmap(void);
+
+int hash_get_digest(uint8_t *digest, uint32_t digest_size, hash_algo_t algo);
 
 #endif/*!HASH_H_*/

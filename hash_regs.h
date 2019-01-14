@@ -36,7 +36,7 @@
 /**** STR register *****/
 #define _r_CORTEX_M_HASH_STR  REG_ADDR(r_CORTEX_M_HASH_BASE + 0x008)
 #define HASH_STR_NBLW_Pos      0
-#define HASH_STR_NBLW_Msk      ((uint32_t)1f << HASH_STR_NBLW_Pos)
+#define HASH_STR_NBLW_Msk      ((uint32_t)0x1f << HASH_STR_NBLW_Pos)
 #define HASH_STR_DCAL_Pos      8
 #define HASH_STR_DCAL_Msk      ((uint32_t)1 << HASH_STR_DCAL_Pos)
 
@@ -60,7 +60,6 @@
 
 /* data out registers banks base */
 #define _r_CORTEX_M_HASH_CSR  REG_ADDR(r_CORTEX_M_HASH_BASE + 0x0F8)
-#define HASH_HR               REG_ADDR(r_CORTEX_M_HASH_BASE + 0x00C)
-#define HASH_HR_              REG_ADDR(r_CORTEX_M_HASH_BASE + 0x310)
+#define HASH_HR(x)             REG_ADDR(r_CORTEX_M_HASH_BASE + 0x310 + (4*x))
 
 #endif /*HASH_REGS_H_*/
