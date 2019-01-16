@@ -93,7 +93,7 @@ static int hash_send_buf_dma(physaddr_t buff, uint32_t size)
     dma_hash.in_addr = buff;
     dma_hash.size    = size;
 
-    ret = sys_cfg(CFG_DMA_RECONF, &dma_hash,
+    ret = sys_cfg(CFG_DMA_RECONF, (dma_t*)&dma_hash,
                   (DMA_RECONF_BUFIN | DMA_RECONF_BUFOUT | DMA_RECONF_BUFSIZE),
                    dma_hash_desc);
 
@@ -117,7 +117,7 @@ static void hash_send_buf_nodma(physaddr_t buff, uint32_t size)
         write_reg_value(_r_CORTEX_M_HASH_DIN, tab[offset]);
     }
     /* residual? size not a multiple of 4 ? */
-    
+
 }
 
 
@@ -149,9 +149,9 @@ int hash_request(hash_req_type_t      type,
                      uint32_t             addr,
                      uint32_t             size)
 {
-    /* NOTE: the hash hardware IP on STM32F4xx is meant to 
+    /* NOTE: the hash hardware IP on STM32F4xx is meant to
      * process intermediate chunks of multiple of 32 bits (HASH FIFO size words).
-     * Hence, 
+     * Hence,
      */
     if((type != HASH_REQ_LAST) && (size % 4 != 0)){
 #if CONFIG_USR_DRV_HASH_DEBUG
@@ -213,7 +213,7 @@ int hash_request(hash_req_type_t      type,
     	    if(type == HASH_REQ_LAST){
 		/* Handle NBLW for the last word (to handle padding issues) */
         	set_reg(_r_CORTEX_M_HASH_STR, (8*(size % 4)), HASH_STR_NBLW);
-		/* Set MDMAT to 0, DCAL should be automatically set to 1 at the end the 
+		/* Set MDMAT to 0, DCAL should be automatically set to 1 at the end the
 		 * next DMA transfer
 		 */
 	        set_reg(_r_CORTEX_M_HASH_CR, 0x0, HASH_CR_MDMAT);
@@ -377,7 +377,7 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
 #endif
 
         // FIXME - handling ret value
-        ret = sys_init(INIT_DMA, &dma_hash, &dma_hash_desc);
+        ret = sys_init(INIT_DMA, &dma_hash, (int*)&dma_hash_desc);
         if (ret != SYS_E_DONE) {
             goto err;
         }
@@ -394,7 +394,7 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
 #endif
                 const char *name = "hash";
                 memset((void*)&dev_hash, 0, sizeof(device_t));
-                strncpy(dev_hash.name, name, sizeof (dev_hash.name));
+                strncpy((char*)dev_hash.name, name, sizeof (dev_hash.name));
                 dev_hash.address = 0x50060400;
                 dev_hash.size = 0x400;
                 if (map_mode == HASH_MAP_AUTO) {
@@ -423,7 +423,7 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
                     dev_hash.irq_num = 0;
                 }
                 dev_hash.gpio_num = 0;
-                ret = sys_init(INIT_DEVACCESS, &dev_hash, &dev_hash_desc);
+                ret = sys_init(INIT_DEVACCESS, (device_t*)&dev_hash, (int*)&dev_hash_desc);
                 if (ret != SYS_E_DONE) {
                     goto err;
                 }
