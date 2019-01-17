@@ -427,6 +427,7 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
                 if (ret != SYS_E_DONE) {
                     goto err;
                 }
+                break;
             }
         default:
             {
