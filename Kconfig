@@ -3,6 +3,4 @@ config USR_DRV_HASH
   default y
   ---help---
   Support for STM32F4 HASH hardware IP.
-config USR_DRV_HASH_CFLAGS
-  string
-  default " -I../../drivers/socs/stm32f439/hash/api " if USR_DRV_HASH
+
