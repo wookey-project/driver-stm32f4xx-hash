@@ -24,7 +24,7 @@ static volatile bool use_it  = false;
 static volatile int dma_hash_desc = 0;
 static volatile int dev_hash_desc = 0;
 static volatile dma_t dma_hash = { 0 };
-static volatile device_t dev_hash = { 0 };
+static volatile device_t dev_hash;
 
 static volatile bool hash_is_mapped = false;
 
@@ -351,6 +351,8 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
                         hash_dev_mode_t       dev_mode)
 {
     e_syscall_ret ret;
+
+    memset((void*)&dev_hash, 0, sizeof(device_t));
 
     if (transfert_mode != HASH_TRANS_NODMA) {
 
