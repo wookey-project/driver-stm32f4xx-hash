@@ -1,7 +1,8 @@
 #include "api/libhash.h"
 #include "hash_regs.h"
 #include "api/syscall.h"
-#include "api/print.h"
+#include "api/stdio.h"
+#include "api/nostd.h"
 #include "api/string.h"
 #include "api/regutils.h"
 
