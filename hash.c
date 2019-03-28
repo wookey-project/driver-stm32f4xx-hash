@@ -5,6 +5,7 @@
 #include "api/nostd.h"
 #include "api/string.h"
 #include "api/regutils.h"
+#include "api/arpa/inet.h"
 
 enum dma_controller {
     DMA1 = 1,
@@ -454,68 +455,68 @@ int hash_get_digest(uint8_t *digest, uint32_t digest_size, hash_algo_t algo){
 	    if(digest_size < 16){
 		goto err;
 	    }
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(0)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(0)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(1)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(1)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(2)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(2)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(3)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(3)));
             break;
         case HASH_SHA1:
         case HASH_HMAC_SHA1:
 	    if(digest_size < 20){
 		goto err;
 	    }
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(0)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(0)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(1)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(1)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(2)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(2)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(3)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(3)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(4)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(4)));
             break;
         case HASH_SHA224:
         case HASH_HMAC_SHA224:
 	    if(digest_size < 28){
 		goto err;
 	    }
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(0)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(0)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(1)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(1)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(2)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(2)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(3)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(3)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(4)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(4)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(5)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(5)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(6)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(6)));
             break;
         case HASH_SHA256:
         case HASH_HMAC_SHA256:
 	    if(digest_size < 32){
 		goto err;
 	    }
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(0)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(0)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(1)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(1)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(2)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(2)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(3)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(3)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(4)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(4)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(5)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(5)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(6)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(6)));
             digest += 4;
-            *(uint32_t *) digest = to_big32(read_reg_value(HASH_HR(7)));
+            *(uint32_t *) digest = htonl(read_reg_value(HASH_HR(7)));
             break;
         default:
             goto err;
