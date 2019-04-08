@@ -39,8 +39,8 @@ typedef void (*cb_endofdma)(uint8_t irq, uint32_t sr);
 
 
 int hash_early_init(hash_transfert_mode_t transfert_mode,
-                        hash_map_mode_t       map_mode,
-                        hash_dev_mode_t       dev_mode);
+                    hash_map_mode_t       map_mode,
+                    hash_dev_mode_t       dev_mode);
 
 int hash_init(cb_endofdigest eodigest_callback, cb_endofdma eodma_callback, hash_algo_t algo);
 
