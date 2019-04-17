@@ -1,28 +1,34 @@
+###################################################################
+# About the driver name and path
+###################################################################
+
+# driver library name, without extension
 LIB_NAME ?= libhash
 
+# library name, with extension
 PROJ_FILES = ../../../../
+
+# driver library name, with extension
 LIB_FULL_NAME = $(LIB_NAME).a
 
-VERSION = 1
-#############################
-
+# SDK helper Makefiles inclusion
 -include $(PROJ_FILES)/m_config.mk
 -include $(PROJ_FILES)/m_generic.mk
 
 # use an app-specific build dir
 APP_BUILD_DIR = $(BUILD_DIR)/drivers/$(LIB_NAME)
 
-CFLAGS += -ffreestanding
+###################################################################
+# About the compilation flags
+###################################################################
+
 CFLAGS += $(DRIVERS_CFLAGS)
-CFLAGS += -I$(PROJ_FILES)/include/generated -I$(PROJ_FILES) -I$(PROJ_FILES)/libs/std -I.
 CFLAGS += -MMD -MP
-CFLAGS += -fno-pie -Os
-CFLAGS += -I.
+CFLAGS += -fno-pie # is this really requested for flash driver ?
 
-LDFLAGS += -fno-builtin -nostdlib -nostartfiles
-LD_LIBS +=
-
-BUILD_DIR ?= $(PROJ_FILE)build
+#############################################################
+# About driver sources
+#############################################################
 
 SRC_DIR = .
 SRC = $(wildcard $(SRC_DIR)/*.c)
@@ -36,6 +42,10 @@ OUT_DIRS = $(dir $(OBJ))
 TODEL_CLEAN += $(OBJ)
 # targets
 TODEL_DISTCLEAN += $(APP_BUILD_DIR)
+
+##########################################################
+# generic targets of all libraries makefiles
+##########################################################
 
 .PHONY: app doc
 
@@ -58,9 +68,6 @@ show:
 
 lib: $(APP_BUILD_DIR)/$(LIB_FULL_NAME)
 
-#############################################################
-# build targets (driver, core, SoC, Board... and local)
-# App C sources files
 $(APP_BUILD_DIR)/%.o: %.c
 	$(call if_changed,cc_o_c)
 
@@ -73,4 +80,3 @@ $(APP_BUILD_DIR):
 	$(call cmd,mkdir)
 
 -include $(DEP)
--include $(TESTSDEP)
