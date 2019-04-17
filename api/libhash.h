@@ -2,7 +2,7 @@
 #define HASH_H_
 
 #include "autoconf.h"
-#include "api/types.h"
+#include "libc/types.h"
 
 typedef enum {
     HASH_TRANS_NODMA,
