@@ -111,7 +111,7 @@ static void hash_send_buf_nodma(physaddr_t buff, uint32_t size)
 {
     uint32_t *tab = (uint32_t*)buff;
     /* buff is naturally trunkated to a multiple of 4 bytes here */
-    for (uint32_t offset = 0; offset < size / 4; ++offset) {
+    for (uint32_t offset = 0; offset < (size / 4); ++offset) {
         write_reg_value(_r_CORTEX_M_HASH_DIN, tab[offset]);
     }
     /* residual? size not a multiple of 4 ? */
@@ -174,14 +174,14 @@ int hash_request(hash_req_type_t      type,
         uint32_t offset = 0;
 
 	/* Sanity checks */
-	if(addr % 4 != 0){
+	if((addr % 4) != 0){
 	    /* DMA buffer must be aligned on 4 bytes */
 #if CONFIG_USR_DRV_HASH_DEBUG
             printf("HASH Error: asking for DMA on unaligned address %xn", addr);
 #endif
 	    goto err;
         }
-	if(DMA_MAX_TRANSFERT_SIZE % 4 != 0){
+	if((DMA_MAX_TRANSFERT_SIZE % 4) != 0){
 		goto err;
 	}
         if (size > DMA_MAX_TRANSFERT_SIZE) {
@@ -220,7 +220,7 @@ int hash_request(hash_req_type_t      type,
 	    	set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_MDMAT);
 	    }
             set_reg(_r_CORTEX_M_HASH_CR, 0x1, HASH_CR_DMAE);
-	    if(residue % 4 != 0){
+	    if((residue % 4) != 0){
 		/* NOTE: this is a little bit ugly since we overflow in reading the input buffer
 		 * because of the limitations of the hardware taking only 32 bits words at a time,
 		 * yielding in DMA transfers multiple of 32 bits.
@@ -395,8 +395,8 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
                 const char *name = "hash";
                 memset((void*)&dev_hash, 0, sizeof(device_t));
                 strncpy((char*)dev_hash.name, name, sizeof (dev_hash.name));
-                dev_hash.address = 0x50060400;
-                dev_hash.size = 0x400;
+                dev_hash.address = hash_dev_infos.address;
+                dev_hash.size = hash_dev_infos.size;
                 if (map_mode == HASH_MAP_AUTO) {
                     dev_hash.map_mode = DEV_MAP_AUTO;
                 } else {
