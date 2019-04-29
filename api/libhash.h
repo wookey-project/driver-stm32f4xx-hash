@@ -1,5 +1,5 @@
-#ifndef HASH_H_
-#define HASH_H_
+#ifndef LIB_HASH_H_
+#define LIB_HASH_H_
 
 #include "autoconf.h"
 #include "libc/types.h"
@@ -54,4 +54,4 @@ int hash_unmap(void);
 
 int hash_get_digest(uint8_t *digest, uint32_t digest_size, hash_algo_t algo);
 
-#endif/*!HASH_H_*/
+#endif/*!LIB_HASH_H_*/

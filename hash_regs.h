@@ -1,7 +1,11 @@
 #ifndef HASH_REGS_H_
 #define HASH_REGS_H_
 
-#define r_CORTEX_M_HASH_BASE 0x50060400
+#include "libc/types.h"
+
+#include "generated/hash.h"
+
+#define r_CORTEX_M_HASH_BASE HASH_BASE
 
 #define HASH_IRQ 0x60 /* interrupt identifier (starting from ESTACK, IRQ is 0x50 */
 
@@ -60,6 +64,6 @@
 
 /* data out registers banks base */
 #define _r_CORTEX_M_HASH_CSR  REG_ADDR(r_CORTEX_M_HASH_BASE + 0x0F8)
-#define HASH_HR(x)             REG_ADDR(r_CORTEX_M_HASH_BASE + 0x310 + (4*x))
+#define HASH_HR(x)             REG_ADDR(r_CORTEX_M_HASH_BASE + 0x310 + (4*(x)))
 
 #endif /*HASH_REGS_H_*/

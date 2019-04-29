@@ -7,17 +7,13 @@
 #include "libc/regutils.h"
 #include "libc/arpa/inet.h"
 
-enum dma_controller {
-    DMA1 = 1,
-    DMA2 = 2
-};
-
 #define CONFIG_USR_DRV_HASH_DEBUG 1
 
 #define DMA_MAX_TRANSFERT_SIZE 0x8000
 
-#define DMA2_STREAM_HASH_IN 7
-#define DMA2_CHANNEL_HASH_IN 2
+#define DMA_HASH_CTRL CRYP_USER_DMA_CTRL
+#define DMA_STREAM_HASH_IN HASH_DMA_IN_STREAM
+#define DMA_CHANNEL_HASH_IN HASH_DMA_IN_CHANNEL
 
 
 static volatile bool use_dma = false;
@@ -358,9 +354,9 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
 
     if (transfert_mode != HASH_TRANS_NODMA) {
 
-        dma_hash.dma          = DMA2;
-        dma_hash.stream       = DMA2_STREAM_HASH_IN;
-        dma_hash.channel      = DMA2_CHANNEL_HASH_IN;
+        dma_hash.dma          = DMA_HASH_CTRL;
+        dma_hash.stream       = DMA_STREAM_HASH_IN;
+        dma_hash.channel      = DMA_CHANNEL_HASH_IN;
         dma_hash.dir          = MEMORY_TO_PERIPHERAL;
         dma_hash.in_addr      = (physaddr_t) 0;
         dma_hash.out_addr     = (volatile physaddr_t)_r_CORTEX_M_HASH_DIN;
