@@ -110,12 +110,30 @@ err:
 static void hash_send_buf_nodma(physaddr_t buff, uint32_t size)
 {
     uint32_t *tab = (uint32_t*)buff;
-    /* buff is naturally trunkated to a multiple of 4 bytes here */
-    for (uint32_t offset = 0; offset < (size / 4); ++offset) {
+    uint32_t offset;
+    /* buff is naturally truncated to a multiple of 4 bytes here */
+    for (offset = 0; offset < (size / 4); ++offset) {
         write_reg_value(_r_CORTEX_M_HASH_DIN, tab[offset]);
     }
     /* residual? size not a multiple of 4 ? */
-
+    uint8_t *last = (uint8_t*)(buff+(4*offset));
+    uint32_t tmp;
+    switch(size & 3){
+      case 1:
+         write_reg_value(_r_CORTEX_M_HASH_DIN, *((uint8_t *)last)); 
+         break;
+      case 2:
+         write_reg_value(_r_CORTEX_M_HASH_DIN, *((uint16_t *)last)); 
+         break;
+      case 3:
+         tmp  = ((uint8_t*) last)[0];
+         tmp |= ((uint8_t*) last)[1] << 8;
+         tmp |= ((uint8_t*) last)[2] << 16;
+         write_reg_value(_r_CORTEX_M_HASH_DIN, tmp);  
+         break;
+      default:
+         break;
+    }
 }
 
 
@@ -149,16 +167,15 @@ int hash_request(hash_req_type_t      type,
 {
     /* NOTE: the hash hardware IP on STM32F4xx is meant to
      * process intermediate chunks of multiple of 32 bits (HASH FIFO size words).
-     * Hence,
      */
-    if((type != HASH_REQ_LAST) && (size % 4 != 0)){
+    if((type != HASH_REQ_LAST) && ((size % 4) != 0)){
 #if CONFIG_USR_DRV_HASH_DEBUG
         printf("HASH Error: asking for intermediate size of %d not 32-bit word multiple!\n", size);
 #endif
         goto err;
     }
-    /* if size is not 512 multiple, setting DCAL to 1 automatically
-     * pad to finish the last chunk calculation if needed and the
+    /* If size is not 512 multiple, setting DCAL to 1 automatically
+     * pads to finish the last chunk calculation if needed and the
      * result is calculated */
     if(!use_dma){
         hash_send_buf_nodma(addr, size);
@@ -373,11 +390,11 @@ int hash_early_init(hash_transfert_mode_t transfert_mode,
         dma_hash.out_handler  = (user_dma_handler_t) dma_hash_handler;    /* not used */
 
 #if CONFIG_USR_DRV_HASH_DEBUG
-        printf("init DMA CRYP in ...\n");
+        printf("init DMA HASH in ...\n");
 #endif
 
-        // FIXME - handling ret value
-        ret = sys_init(INIT_DMA, &dma_hash, (int*)&dma_hash_desc);
+        int dma_hash_desc_ = dma_hash_desc;
+        ret = sys_init(INIT_DMA, &dma_hash, (int*)&dma_hash_desc_);
         if (ret != SYS_E_DONE) {
             goto err;
         }
