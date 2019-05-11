@@ -107,6 +107,9 @@ err:
     return -1;
 }
 
+/* [RB] FIXME: the 'no dma' version of the hash coprocessor is a work in
+ * progress and has not been extensively tested (compared to the DMA version).
+ */
 static void hash_send_buf_nodma(physaddr_t buff, uint32_t size)
 {
     uint32_t *tab = (uint32_t*)buff;
