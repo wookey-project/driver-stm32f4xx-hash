@@ -1,12 +1,12 @@
 Hash driver FAQ
 ---------------
 
-Is the Hash driver thread safe ?
+Is the Hash driver thread safe?
 """"""""""""""""""""""""""""""""
 
 No, because the device is not. Beware to serialize correctly device requests to avoid any problems.
 
-Can I request digests from unmapped data when using DMA ?
+Can I request digests from unmapped data when using DMA?
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Yes and no. It is possible to use DMA to let the HASH device access the data
