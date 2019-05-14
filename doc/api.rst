@@ -1,6 +1,9 @@
 About The Hash driver API
 -------------------------
 
+.. highlight:: c
+
+
 Initializing the hash driver
 """"""""""""""""""""""""""""
 
