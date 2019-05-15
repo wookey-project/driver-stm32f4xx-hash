@@ -68,8 +68,7 @@ The init step **does map** the HASH device if it is not. If HASH_MAP_VOLUNTARY i
 At initialization time, the task has to declare the following:
 
    * *eodigest_callback*: the callback that is executed at the end of the current digest calculation
-   * *eodma_callback*: in DMA mode only, specify the DMA callback that is executed at the end of the DMA transfer. This callback can be NULL, even in DMA mode (in this case
-   no handler is executed when the DMA transfer is over)
+   * *eodma_callback*: in DMA mode only, specify the DMA callback that is executed at the end of the DMA transfer. This callback can be NULL, even in DMA mode (in this case no handler is executed when the DMA transfer is over)
    * *algo*: the HASH algorithm that has to be configured for all the following steps
 
 
