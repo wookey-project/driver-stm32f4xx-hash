@@ -7,7 +7,7 @@
 #include "libc/regutils.h"
 #include "libc/arpa/inet.h"
 
-#define CONFIG_USR_DRV_HASH_DEBUG 1
+#define CONFIG_USR_DRV_HASH_DEBUG 0
 
 #define DMA_MAX_TRANSFERT_SIZE 0x8000
 
@@ -322,25 +322,33 @@ int hash_init(cb_endofdigest eodigest_callback,
             set_reg(&reg, 0, HASH_CR_ALGO0);
             set_reg(&reg, 0, HASH_CR_ALGO1);
             set_reg(&reg, 1, HASH_CR_MODE);
+#if CONFIG_USR_DRV_HASH_DEBUG
             printf("hmac procedure not yet supported. Stopping init here\n");
+#endif
             goto err;
             break;
         case HASH_HMAC_SHA224:
 	    set_reg(&reg, 0, HASH_CR_ALGO0);
 	    set_reg(&reg, 1, HASH_CR_ALGO1);
             set_reg(&reg, 1, HASH_CR_MODE);
+#if CONFIG_USR_DRV_HASH_DEBUG
             printf("hmac procedure not yet supported. Stopping init here\n");
+#endif
             goto err;
             break;
         case HASH_HMAC_SHA256:
             set_reg(&reg, 1, HASH_CR_ALGO0);
             set_reg(&reg, 1, HASH_CR_ALGO1);
             set_reg(&reg, 1, HASH_CR_MODE);
+#if CONFIG_USR_DRV_HASH_DEBUG
             printf("hmac procedure not yet supported. Stopping init here\n");
+#endif
             goto err;
             break;
         default:
+#if CONFIG_USR_DRV_HASH_DEBUG
             printf("unsupported hash algorithm!\n");
+#endif
             goto err;
     }
     if (use_dma) {
