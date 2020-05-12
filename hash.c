@@ -6,6 +6,7 @@
 #include "libc/string.h"
 #include "libc/regutils.h"
 #include "libc/arpa/inet.h"
+#include "libc/sanhandlers.h"
 
 #define CONFIG_USR_DRV_HASH_DEBUG 0
 
@@ -144,7 +145,14 @@ static void dma_hash_handler(uint8_t irq,
                              uint32_t status)
 {
     if (eodma_cb) {
-        eodma_cb(irq, status);
+	/* Sanity check our handler */
+        if(handler_sanity_check((void*)eodma_cb)){
+	     sys_exit();
+             return;
+        }
+        else{
+            eodma_cb(irq, status);
+        }
     }
     dma_end = true;
 }
@@ -155,7 +163,14 @@ static void hash_handler(uint8_t irq,
 {
     /* executing the user callback at ISR time when DCIE interrupt rise */
     if (eodigest_cb) {
-        eodigest_cb(irq, status);
+        /* Sanity check our handler */
+        if(handler_sanity_check((void*)eodma_cb)){
+	    sys_exit();
+	    return;
+        }
+        else{
+            eodigest_cb(irq, status);
+        }
     }
 }
 
