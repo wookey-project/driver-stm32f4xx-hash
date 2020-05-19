@@ -146,8 +146,7 @@ static void dma_hash_handler(uint8_t irq,
 {
     if (eodma_cb) {
 	/* Sanity check our handler */
-        if(handler_sanity_check((void*)eodma_cb)){
-	     sys_exit();
+        if(handler_sanity_check_with_panic((physaddr_t)eodma_cb)){
              return;
         }
         else{
@@ -164,8 +163,7 @@ static void hash_handler(uint8_t irq,
     /* executing the user callback at ISR time when DCIE interrupt rise */
     if (eodigest_cb) {
         /* Sanity check our handler */
-        if(handler_sanity_check((void*)eodma_cb)){
-	    sys_exit();
+        if(handler_sanity_check_with_panic((physaddr_t)eodma_cb)){
 	    return;
         }
         else{
